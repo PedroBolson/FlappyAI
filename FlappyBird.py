@@ -225,14 +225,14 @@ def main(dnas, config):
 
         for i, bird in enumerate(birds):
             bird.move()
+            if ai_playing:
+                dna_list[i].fitness += 0.1
+                output = networks[i].activate((bird.y,
+                                               abs(bird.y - pipes[i_pipe].top_pos),
+                                               abs(bird.y - pipes[i_pipe].bot_pos)))
 
-            dna_list[i].fitness += 0.1
-            output = networks[i].activate((bird.y,
-                                           abs(bird.y - pipes[i_pipe].top_pos),
-                                           abs(bird.y - pipes[i_pipe].bot_pos)))
-
-            if output[0] > 0.5:
-                bird.jump()
+                if output[0] > 0.5:
+                    bird.jump()
         ground.move()
 
         addPipe = False
@@ -255,8 +255,10 @@ def main(dnas, config):
         if addPipe:
             points += 1
             pipes.append(Pipe(600))
-            for dna in dna_list:
-                dna.fitness += 5
+
+            if ai_playing:
+                for dna in dna_list:
+                    dna.fitness += 2
         for pipe in remove_pipe:
             pipes.remove(pipe)
 
