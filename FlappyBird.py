@@ -3,7 +3,7 @@ import os
 import random
 import neat
 
-ai_playing = True
+ai_playing = False
 generation = 0
 
 # TAMANHO DA TELA
