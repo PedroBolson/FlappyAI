@@ -3,15 +3,16 @@ import os
 import random
 import neat
 
-ai_playing = False
+ai_playing = True
 generation = 0
 
 # TAMANHO DA TELA
-WIDTH_SCREEN = 500
+WIDTH_SCREEN = 550
 HEIGHT_SCREEN = 800
 
 # IMAGENS
 IMAGE_PIPE = pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'pipe.png')))
+IMAGE_DOUBLE_PIPE = pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'doublepipe.png')))
 IMAGE_GROUND = pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'base.png')))
 IMAGE_BG = pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'bg.png')))
 IMAGE_BIRD = [
@@ -94,7 +95,7 @@ class Bird:
 
 class Pipe:
     DISTANCE = 200
-    SPEED = 5
+    SPEED = 7
 
     def __init__(self, x):
         self.x = x
@@ -103,6 +104,49 @@ class Pipe:
         self.bot_pos = 0
         self.TOP_PIPE = pygame.transform.flip(IMAGE_PIPE, False, True)
         self.BOT_PIPE = IMAGE_PIPE
+        self.Pass = False
+        self.define_height()
+
+    def define_height(self):
+        self.height = random.randrange(50, 450)
+        self.top_pos = self.height - self.TOP_PIPE.get_height()
+        self.bot_pos = self.height + self.DISTANCE
+
+    def move(self):
+        self.x -= self.SPEED
+
+    def draw(self, screen):
+        screen.blit(self.TOP_PIPE, (self.x, self.top_pos))
+        screen.blit(self.BOT_PIPE, (self.x, self.bot_pos))
+
+    def collide(self, bird):
+        bird_mask = bird.get_mask()
+        top_mask = pygame.mask.from_surface(self.TOP_PIPE)
+        bot_mask = pygame.mask.from_surface(self.BOT_PIPE)
+
+        top_dist = (self.x - bird.x, self.top_pos - round(bird.y))
+        bot_dist = (self.x - bird.x, self.bot_pos - round(bird.y))
+
+        bot_point = bird_mask.overlap(bot_mask, bot_dist)
+        top_point = bird_mask.overlap(top_mask, top_dist)
+
+        if bot_point or top_point:
+            return True
+        else:
+            return False
+
+
+class DoublePipe:
+    DISTANCE = 200
+    SPEED = 7
+
+    def __init__(self, x):
+        self.x = x
+        self.height = 0
+        self.top_pos = 0
+        self.bot_pos = 0
+        self.TOP_PIPE = pygame.transform.flip(IMAGE_DOUBLE_PIPE, False, True)
+        self.BOT_PIPE = IMAGE_DOUBLE_PIPE
         self.Pass = False
         self.define_height()
 
@@ -172,6 +216,8 @@ def draw_screen(screen, birds, pipes, ground, points):
     if ai_playing:
         text = POINTS_FONT.render(f"Geracao: {generation}", 1, (255, 255, 255))
         screen.blit(text, (10, 10))
+        text = POINTS_FONT.render(f"Individuos: {len(birds)}", 1, (255, 255, 255))
+        screen.blit(text, (10, 60))
 
     ground.draw(screen)
     pygame.display.update()
@@ -196,13 +242,14 @@ def main(dnas, config):
 
     ground = Ground(730)
     pipes = [Pipe(700)]
+    last_double = False
     screen = pygame.display.set_mode((WIDTH_SCREEN, HEIGHT_SCREEN))
     points = 0
     clock = pygame.time.Clock()
 
     running = True
     while running:
-        clock.tick(30)
+        clock.tick(60)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -253,8 +300,19 @@ def main(dnas, config):
                 remove_pipe.append(pipe)
 
         if addPipe:
-            points += 1
-            pipes.append(Pipe(600))
+            lottery = int(random.randrange(1,4))
+
+            if lottery == 3:
+                pipes.append(DoublePipe(650))
+                points += 1
+                last_double = True
+            else:
+                points += 1
+                if last_double:
+                    pipes.append(Pipe(700))
+                else:
+                    pipes.append(Pipe(random.randrange(550, 700)))
+                last_double = False
 
             if ai_playing:
                 for dna in dna_list:
@@ -296,6 +354,7 @@ def run(config_path):
         population.run(main, 50)
     else:
         main(None, None)
+
 
 if __name__ == '__main__':
     config_path = 'config.txt'
