@@ -5,6 +5,7 @@ import neat
 
 ai_playing = True
 generation = 0
+PRINT_LINES = True
 
 # TAMANHO DA TELA
 WIDTH_SCREEN = 550
@@ -101,11 +102,11 @@ class Pipe:
         self.x = x
         self.height = 0
         self.top_pos = 0
-        self.bot_pos = 0
         self.TOP_PIPE = pygame.transform.flip(IMAGE_PIPE, False, True)
         self.BOT_PIPE = IMAGE_PIPE
         self.Pass = False
         self.define_height()
+        self.top_bottom_left = self.bot_pos - self.DISTANCE
 
     def define_height(self):
         self.height = random.randrange(50, 450)
@@ -149,6 +150,7 @@ class DoublePipe:
         self.BOT_PIPE = IMAGE_DOUBLE_PIPE
         self.Pass = False
         self.define_height()
+        self.top_bottom_left = self.bot_pos - self.DISTANCE
 
     def define_height(self):
         self.height = random.randrange(50, 450)
@@ -219,6 +221,12 @@ def draw_screen(screen, birds, pipes, ground, points):
         text = POINTS_FONT.render(f"Individuos: {len(birds)}", 1, (255, 255, 255))
         screen.blit(text, (10, 60))
 
+        if PRINT_LINES:
+            if len(birds) > 0:
+                for pipe in pipes:
+                    pygame.draw.line(screen, (255, 0, 0), (pipe.x, pipe.bot_pos), (birds[0].x, birds[0].y), 2)
+                    pygame.draw.line(screen, (255, 0, 0), (pipe.x, pipe.top_bottom_left), (birds[0].x, birds[0].y), 2)
+
     ground.draw(screen)
     pygame.display.update()
 
@@ -275,9 +283,8 @@ def main(dnas, config):
             if ai_playing:
                 dna_list[i].fitness += 0.1
                 output = networks[i].activate((bird.y,
-                                               abs(bird.y - pipes[i_pipe].top_pos),
+                                               abs(bird.y - pipes[i_pipe].top_bottom_left),
                                                abs(bird.y - pipes[i_pipe].bot_pos)))
-
                 if output[0] > 0.5:
                     bird.jump()
         ground.move()
