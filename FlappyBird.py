@@ -96,7 +96,7 @@ class Bird:
 
 class Pipe:
     DISTANCE = 200
-    SPEED = 5  # Velocidade de movimento dos canos
+    SPEED = 7  # Velocidade de movimento dos canos
 
     def __init__(self, x):
         self.x = x
@@ -107,8 +107,8 @@ class Pipe:
         self.BOT_PIPE = IMAGE_PIPE
         self.Pass = False
         self.define_height()
-        self.top_bottom_left = self.bot_pos - self.DISTANCE
         self.VEL_VERTICAL = random.choice([1, 2])
+        self.top_bottom_left = self.bot_pos - self.DISTANCE
 
     def define_height(self):
         self.height = random.randrange(50, 450)
@@ -126,6 +126,7 @@ class Pipe:
             self.VEL_VERTICAL *= -1
         self.top_pos = self.height - self.TOP_PIPE.get_height()
         self.bot_pos = self.height + self.DISTANCE
+        self.top_bottom_left = self.bot_pos - self.DISTANCE
 
     def draw(self, screen):
         screen.blit(self.TOP_PIPE, (self.x, self.top_pos))
@@ -150,7 +151,7 @@ class Pipe:
 
 class DoublePipe:
     DISTANCE = 200
-    SPEED = 5
+    SPEED = 7
 
     def __init__(self, x):
         self.x = x
@@ -180,6 +181,7 @@ class DoublePipe:
             self.VEL_VERTICAL *= -1
         self.top_pos = self.height - self.TOP_PIPE.get_height()
         self.bot_pos = self.height + self.DISTANCE
+        self.top_bottom_left = self.bot_pos - self.DISTANCE
 
     def draw(self, screen):
         screen.blit(self.TOP_PIPE, (self.x, self.top_pos))
@@ -278,7 +280,7 @@ def main(dnas, config):
 
     running = True
     while running:
-        clock.tick(30)
+        clock.tick(60)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -309,9 +311,6 @@ def main(dnas, config):
                 if output[0] > 0.5:
                     bird.jump()
         ground.move()
-
-        for pipe in pipes:
-            pipe.move()
 
         addPipe = False
         remove_pipe = []
