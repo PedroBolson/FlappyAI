@@ -96,7 +96,7 @@ class Bird:
 
 class Pipe:
     DISTANCE = 200
-    SPEED = 7
+    SPEED = 5  # Velocidade de movimento dos canos
 
     def __init__(self, x):
         self.x = x
@@ -108,6 +108,7 @@ class Pipe:
         self.Pass = False
         self.define_height()
         self.top_bottom_left = self.bot_pos - self.DISTANCE
+        self.VEL_VERTICAL = random.choice([1, 2])
 
     def define_height(self):
         self.height = random.randrange(50, 450)
@@ -115,7 +116,16 @@ class Pipe:
         self.bot_pos = self.height + self.DISTANCE
 
     def move(self):
-        self.x -= self.SPEED
+        self.x -= self.SPEED  # Movimento para a esquerda
+        self.height += self.VEL_VERTICAL * 2
+        if self.height < 50:
+            self.height = 50
+            self.VEL_VERTICAL *= -1
+        elif self.height > 450:
+            self.height = 450
+            self.VEL_VERTICAL *= -1
+        self.top_pos = self.height - self.TOP_PIPE.get_height()
+        self.bot_pos = self.height + self.DISTANCE
 
     def draw(self, screen):
         screen.blit(self.TOP_PIPE, (self.x, self.top_pos))
@@ -140,7 +150,7 @@ class Pipe:
 
 class DoublePipe:
     DISTANCE = 200
-    SPEED = 7
+    SPEED = 5
 
     def __init__(self, x):
         self.x = x
@@ -152,6 +162,7 @@ class DoublePipe:
         self.Pass = False
         self.define_height()
         self.top_bottom_left = self.bot_pos - self.DISTANCE
+        self.VEL_VERTICAL = random.choice([1, 2.5])
 
     def define_height(self):
         self.height = random.randrange(50, 450)
@@ -160,6 +171,15 @@ class DoublePipe:
 
     def move(self):
         self.x -= self.SPEED
+        self.height += self.VEL_VERTICAL * 1
+        if self.height < 50:
+            self.height = 50
+            self.VEL_VERTICAL *= -1
+        elif self.height > 450:
+            self.height = 450
+            self.VEL_VERTICAL *= -1
+        self.top_pos = self.height - self.TOP_PIPE.get_height()
+        self.bot_pos = self.height + self.DISTANCE
 
     def draw(self, screen):
         screen.blit(self.TOP_PIPE, (self.x, self.top_pos))
@@ -258,7 +278,7 @@ def main(dnas, config):
 
     running = True
     while running:
-        clock.tick(60)
+        clock.tick(30)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -289,6 +309,9 @@ def main(dnas, config):
                 if output[0] > 0.5:
                     bird.jump()
         ground.move()
+
+        for pipe in pipes:
+            pipe.move()
 
         addPipe = False
         remove_pipe = []
@@ -359,7 +382,7 @@ def run(config_path):
     population.add_reporter(neat.StatisticsReporter())
 
     if ai_playing:
-        population.run(main, 50)
+        population.run(main)
     else:
         main(None, None)
 
