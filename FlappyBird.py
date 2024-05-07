@@ -205,7 +205,7 @@ class DoublePipe:
 
 
 class Ground:
-    SPEED = 5
+    SPEED = 7
     WIDTH = IMAGE_GROUND.get_width()
     IMAGE = IMAGE_GROUND
 
